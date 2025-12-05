@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::process::Command;
 
 struct Person {
     name: String,
@@ -18,6 +19,7 @@ impl Person {
 fn main() {
     let mut person_list: Vec<Person> = Vec::new();
     loop {
+        clear_terminal();
         let mut user_choice = String::new();
         println!("{} crud person {}", "=".repeat(10), "=".repeat(10));
         println!(
@@ -46,6 +48,7 @@ fn main() {
         match user_choice {
             1 => {
                 add_person(&mut person_list);
+                wait_for_enter();
             }
 
             2 => {
@@ -59,8 +62,8 @@ fn main() {
             }
 
             4 => {
-                println!("kamu memilih nomer 4");
-                break;
+                print_all_persons(&person_list);
+                wait_for_enter();
             }
 
             5 => {
@@ -91,6 +94,22 @@ fn ask_input(msg: &str) -> String {
     s.trim().to_string()
 }
 
+fn clear_terminal() {
+    if cfg!(target_os = "windows") {
+        Command::new("cmd").args(&["/C", "cls"]).status().unwrap();
+    } else {
+        // Untuk Linux / Mac
+        Command::new("clear").status().unwrap();
+    }
+}
+
+fn wait_for_enter() {
+    print!("Tekan [enter] untuk kembali");
+    std::io::stdout().flush().unwrap();
+    let mut buf = String::new();
+    std::io::stdin().read_line(&mut buf).unwrap();
+}
+
 fn save_person(p: Person, l: &mut Vec<Person>) {
     println!("berhasil menyimpan data! data yang disimpan : ");
     p.print_data();
@@ -98,6 +117,7 @@ fn save_person(p: Person, l: &mut Vec<Person>) {
 }
 
 fn add_person(list: &mut Vec<Person>) {
+    clear_terminal();
     print!(
         "\n{} form penambahan orang baru {}\n",
         "-".repeat(10),
@@ -126,4 +146,10 @@ fn add_person(list: &mut Vec<Person>) {
     };
 
     save_person(new_person, list);
+}
+
+fn print_all_persons(list: &Vec<Person>) {
+    for p in list {
+        p.print_data();
+    }
 }
